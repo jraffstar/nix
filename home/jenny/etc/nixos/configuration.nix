@@ -35,11 +35,12 @@ xdg.configFile."mimeapps.list".force = true;
   boot.loader.grub.gfxmodeBios = "1920x1080";  # for BIOS, or
   boot.loader.grub.gfxmodeEfi = "1920x1080";   # for EFI
   boot.loader.grub.gfxpayloadBios = "keep";
-  boot.loader.grub.splashImage = "/etc/nixos/output.png";
+  boot.loader.grub.splashImage = "/home/jenny/etc/nixos/output.png";
   boot.loader.timeout = 10;
   boot.initrd.luks.devices."luks-0a628cdc-161d-4658-8d7b-87e2278e4476".device = "/dev/disk/by-uuid/0a628cdc-161d-4658-8d7b-87e2278e4476";
 
 
+  # Networking configuration
   networking.hostName = "nyaxos"; # Define your hostname.
   networking.wireless.iwd.enable = true; # Enable IWD
   networking.wireless.iwd.settings = {
@@ -78,7 +79,7 @@ xdg.configFile."mimeapps.list".force = true;
   # Configure console keymap
   console.keyMap = "uk";
 
- # Define a user account. Don't forget to set a password with ‘passwd’.
+ # Define a user account
  programs.zsh.enable = true; 
  users.users.jenny = {
     isNormalUser = true;
@@ -87,9 +88,6 @@ xdg.configFile."mimeapps.list".force = true;
     packages = with pkgs; [];
     shell = pkgs.zsh;
   };
-
-  # Allow unfree packages
-  nixpkgs.config.allowUnfree = true;
 
   # X11
   services.displayManager.ly.enable = true;
@@ -119,6 +117,38 @@ xdg.configFile."mimeapps.list".force = true;
 	};
 };
 
+# Bluetooth support enabling
+hardware.bluetooth = {
+  enable = true;
+  powerOnBoot = true;
+  settings = {
+    General = {
+      # Shows battery charge of connected devices on supported
+      # Bluetooth adapters. Defaults to 'false'.
+      Experimental = true;
+      # When enabled other devices can connect faster to us, however
+      # the tradeoff is increased power consumption. Defaults to
+      # 'false'.
+      FastConnectable = true;
+    };
+    Policy = {
+      # Enable all controllers when they are found. This includes
+      # adapters present on start as well as adapters that are plugged
+      # in later on. Defaults to 'true'.
+      AutoEnable = true;
+    };
+  };
+};
+
+  # QEMU + Libvirt + virt-manager
+  programs.virt-manager.enable = true;
+  users.groups.libvirtd.members = ["jenny"];
+  virtualisation.libvirtd.enable = true;
+  virtualisation.spiceUSBRedirection.enable = true;
+
+  # Allow unfree packages
+  nixpkgs.config.allowUnfree = true;
+
   # List packages installed in system profile. To search, run:
   # $ nix search wget
   environment.systemPackages = with pkgs; [
@@ -138,6 +168,10 @@ xdg.configFile."mimeapps.list".force = true;
     xdg-desktop-portal
     kdePackages.xdg-desktop-portal-kde
     ventoy-full 
+    bluetooth_battery
+    bluez
+    bluez-tools
+    bluetui
 
 
     # GUI apps
@@ -165,6 +199,8 @@ xdg.configFile."mimeapps.list".force = true;
     kdePackages.kdenlive
     pkgs.kdePackages.gwenview
     kiwix
+    feishin
+
 
     # Utilities/Dolphin
     kdePackages.dolphin
@@ -179,6 +215,7 @@ xdg.configFile."mimeapps.list".force = true;
     librewolf
     tor-browser
     vesktop
+    teams-for-linux
 
 
     # Development
@@ -187,12 +224,16 @@ xdg.configFile."mimeapps.list".force = true;
     
     # Games
     superTuxKart
+    prismlauncher
 
 
     # Office
     libreoffice
     projectlibre
 
+
+    #VMs
+    qemu
 
     # Python Packages
     (python3.withPackages (ps: with ps; [ pip tkinter ]))
@@ -218,6 +259,6 @@ fonts.packages = with pkgs; [
         liberation_ttf
 ];
 
-  system.stateVersion = "25.11"; # Did you read the comment?
+  system.stateVersion = "25.11";
 
 }
